@@ -1,1 +1,1 @@
-# webgl_playground
+# webgl playground
