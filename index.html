@@ -2,31 +2,48 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>test</title>
-  <link type="text/css" href="res/style.css" rel="stylesheet" />
-  <script src="res/jquery.js"></script>
-  <script src="res/gl-matrix.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>noise playground</title>
+    <link type="text/css" rel="stylesheet" href="./res/element_plus.css" />
+    <link type="text/css" rel="stylesheet" href="./style.css" />
+    <script src="./res/vue.js"></script>
+    <script src="./res/element_plus.js"></script>
 </head>
 
 <body>
-  <div class="panel">
-    <div class="panel_element">
-      <label>factor1:<input id="input_factor1" type="text"></label>
-      <button id="button_factor1">OK</button>
+    <div id="app">
+        <el-container>
+            <el-aside>
+                <el-scrollbar min-size.number="30">
+                    <div class="panel">
+                        <el-form size="mini">
+                            <el-form-item label="value1">
+                                    <el-slider v-model="value1"></el-slider>
+                                </el-form-item>
+                                <el-form-item label="value2">
+                                  <el-slider v-model="value2"></el-slider>
+                              </el-form-item>
+                              <el-form-item label="value3">
+                                <el-slider v-model="value3"></el-slider>
+                            </el-form-item>
+                            <el-form-item>
+                              <el-button type="primary" v-on:click="confirm">confirm</el-button>
+                          </el-form-item>
+                        </el-form>
+                    </div>
+                </el-scrollbar>
+            </el-aside>
+            <el-main>
+                <el-scrollbar min-size.number='30'>
+                    <div class="display">
+                        <canvas id="canvas" width="600" height="500"></canvas>
+                    </div>
+                </el-scrollbar>
+            </el-main>
+        </el-container>
     </div>
-    <div class="panel_element">
-      <label>factor2:<input id="input_factor2" type="text"></label>
-      <button id="button_factor2">OK</button>
-    </div>
-    <div class="panel_element">
-      <button id="button_show_gray">show_gray</button>
-    </div>
-  </div>
-  <div class="display">
-    <canvas id="canvas" width="400" height="300"></canvas>
-  </div>
+
 </body>
 
 
@@ -63,7 +80,8 @@
 
 <script id="main_script" type="module">
   "use strict";
-  import * as webglUtils from './res/utils.js';
+  import * as webglUtils from './src/utils.js';
+  import {gl_matrix as glMatrix} from './res/gl_matrix.js';
 
   function init() {
     var canvas = document.querySelector("#canvas");
@@ -180,20 +198,20 @@
     setTransform(gl, program);
     setTexture(gl, program);
     drawScene(gl, program);
-    $('#button_show_gray').click(function () {
-      console.log('button_show_gray');
-      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 3, 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array([
-        22, 99, 140,
-        190, 230, 255,
-      ]));
-      // set the filtering so we don't need mips and it's not filtered
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      drawScene(gl, program);
-    });
+    // $('#button_show_gray').click(function () {
+    //   console.log('button_show_gray');
+    //   gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    //   gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 3, 2, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, new Uint8Array([
+    //     22, 99, 140,
+    //     190, 230, 255,
+    //   ]));
+    //   // set the filtering so we don't need mips and it's not filtered
+    //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    //   drawScene(gl, program);
+    // });
   }
 
   function getVertexStream() {
@@ -296,18 +314,40 @@
       0, 1, 2, 0, 2, 3,    // front
     ]);
   }
-
-  main();
+  const App = {
+        data: function () {
+            return {
+                value1: 40,
+                value2: 40,
+                value3: 40,
+            }
+        },
+        computed: {
+            event_aggregater: function () {
+                var output = {
+                  value1:this.value1,
+                  value2:this.value2,
+                  value3:this.value3,
+                };
+                return output;
+            }
+        },
+        methods: {
+          confirm: function () {
+                alert('confirm!');
+            }
+        },
+        watch: {
+            event_aggregater: function (new_val, old_val) {
+              console.log(new_val);
+            }
+        },
+        mounted: function () {
+          main();
+        }
+    };
+    const app = Vue.createApp(App);
+    app.use(ElementPlus);
+    app.mount("#app");
 </script>
-<script id="panel_script">
-  $('#button_factor1').click(function () {
-    var val = $('#input_factor1').val();
-    console.log(val);
-  });
-  $('#button_factor2').click(function () {
-    var val = $('#input_factor2').val();
-    console.log(val);
-  });
-</script>
-
 </html>

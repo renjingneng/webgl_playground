@@ -1,0 +1,21 @@
+#canvas {
+    border-style: solid;
+    border-width: 2px;
+    border-color: black;
+}
+
+  .el-aside {
+    background-color: #a5cbd1;
+    border-radius:10px;
+  }
+  .el-main {
+    background-color: #ffffff;
+    text-align: center;
+  }
+
+.panel {
+    margin: 20px;
+}
+.display {
+    margin: 10px;
+}
